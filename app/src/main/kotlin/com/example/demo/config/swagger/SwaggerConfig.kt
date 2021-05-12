@@ -6,7 +6,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.service.ApiInfo
+import springfox.documentation.service.ApiKey
+import springfox.documentation.service.AuthorizationScope
+import springfox.documentation.service.SecurityReference
 import springfox.documentation.spi.DocumentationType
+import springfox.documentation.spi.service.contexts.SecurityContext
 import springfox.documentation.spring.web.plugins.Docket
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 
@@ -17,10 +21,21 @@ class SwaggerConfig(
 ) {
     companion object : KLogging()
 
+    private val apiKeyBearerAuth = ApiKey("Bearer <token>", "Authorization", "header")
+    private val authScopes: List<AuthorizationScope> = emptyList()
+
     @Bean
     fun mainApi(): Docket = apiConfig.toDocket()
-        //.securitySchemes(apiKeyDefs.toSecuritySchemes())
-        //.securityContexts(listOf(securityContext(apiKeyDefs.toSecurityReferences())))
+        .securitySchemes(listOf(apiKeyBearerAuth))
+        .securityContexts(
+            listOf(
+                securityContextFromReferences(
+                    securityReferences = listOf(
+                        SecurityReference(apiKeyBearerAuth.name, *(authScopes.toTypedArray()))
+                    )
+                )
+            )
+        )
         .useDefaultResponseMessages(false)
         .select()
         .apis(RequestHandlerSelectors.basePackage(apiConfig.getBasePackageName()))
@@ -35,3 +50,12 @@ private fun ApiConfig.toApiInfo(): ApiInfo = springfox.documentation.builders.Ap
 
 private fun ApiConfig.toDocket(): Docket = Docket(DocumentationType.SWAGGER_2)
     .apiInfo(this.toApiInfo())
+
+private fun securityContextFromReferences(
+    securityReferences: List<SecurityReference>
+): SecurityContext = SecurityContext
+    .builder()
+    .securityReferences(securityReferences)
+    .forPaths { input -> true } // springfox 2.x
+    // .operationSelector { ctx -> true } // springfox 3.x
+    .build()

@@ -76,7 +76,10 @@ class SecurityConfig {
 
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
-        logger.info { "signed fake jwt: $signedJwtSerialized" }
+        logger.info { "signed fake jwt ... $signedJwtSerialized" }
+        logger.info { "=====================" }
+        logger.info { "Bearer $signedJwtSerialized" }
+        logger.info { "=====================" }
 
         val decoder: NimbusJwtDecoder = hs256.jwtDecoder()
         val decoded: Jwt = decoder.decode(signedJwtSerialized)
