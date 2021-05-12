@@ -1,0 +1,12 @@
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Replace with the domain of your Auth0 tenant.
+          # Note the trailing slash is important!
+          issuer-uri: https://dev-ese8241b.us.auth0.com/
+
+
+
