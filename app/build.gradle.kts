@@ -24,7 +24,7 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:2.0.+")
     // spring
     implementation("org.springframework.boot:spring-boot-starter-web")
-    //implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
    // implementation("org.springframework.boot:spring-boot-starter-security")
 
     // jackson
