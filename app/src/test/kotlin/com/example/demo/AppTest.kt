@@ -3,12 +3,14 @@
  */
 package com.example.demo
 
-import kotlin.test.Test
-import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
 
-class AppTest {
-    @Test fun testAppHasAGreeting() {
-        val classUnderTest = App()
-        assertNotNull(classUnderTest.greeting, "app should have a greeting")
+@SpringBootTest
+class AppTests {
+
+    @Test
+    fun contextLoads() {
     }
+
 }
