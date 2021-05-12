@@ -20,11 +20,20 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
-    // spring, jackson
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-security")
+    // logging
+    implementation("io.github.microutils:kotlin-logging:2.0.+")
+    // spring
     implementation("org.springframework.boot:spring-boot-starter-web")
+    //implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+   // implementation("org.springframework.boot:spring-boot-starter-security")
+
+    // jackson
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    // swagger
+    val swaggerVersion_2x = "2.9.2"
+    implementation("io.springfox:springfox-swagger2:$swaggerVersion_2x")
+    implementation("io.springfox:springfox-swagger-ui:$swaggerVersion_2x")
 
     // test
     //testImplementation("org.jetbrains.kotlin:kotlin-test")
