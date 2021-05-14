@@ -1,18 +1,19 @@
 package com.example.demo.config.security
 
-import com.example.demo.util.jwt.SymmetricSignedJwt
-import com.example.demo.util.jwt.expirationTime
-import com.example.demo.util.jwt.issueTime
-import com.example.demo.util.jwt.jwtClaimSet
+import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import mu.KLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.JwtValidators
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
 import java.time.Duration
@@ -55,20 +56,41 @@ class SecurityConfig {
                     .antMatchers(*(endpointsFullyAuthenticated.toTypedArray())).fullyAuthenticated()
                     .anyRequest().authenticated()
             }
-            .oauth2ResourceServer { it.jwt() }
+            .oauth2ResourceServer { oauth2Conf ->
+                oauth2Conf.jwt {
+                    it.decoder(jwtDecoder())
+                }
+            }
             .build()
     }
 
-    @Bean
-    fun jwtDecoder(): JwtDecoder {
+    //@Bean
+    private fun jwtDecoder(): JwtDecoder {
         genToken()
-        return SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET).jwtDecoder()
+        val jwtDecoder: NimbusJwtDecoder = SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET)
+            .jwtDecoder()
+
+        val defaultValidator: OAuth2TokenValidator<Jwt> = JwtValidators.createDefault()
+        val audiencesExpectedOneOf: List<String> = listOf("myaudience-1", "myaudience-2")
+        val issuersExpectedOneOf: List<String> = listOf("my-issuer-1", "my-issuer-2")
+        val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = issuersExpectedOneOf)
+            .toOAuth2TokenValidator()
+        val audienceValidator: OAuth2TokenValidator<Jwt> =
+            jwtAudienceClaimValidator(acceptAudiences = audiencesExpectedOneOf)
+                .toOAuth2TokenValidator()
+
+        val compoundValidator: DelegatingOAuth2TokenValidator<Jwt> = jwtCompoundOAuth2TokenValidator(
+            defaultValidator, issuerValidator, audienceValidator
+        )
+        jwtDecoder.setJwtValidator(compoundValidator)
+
+        return jwtDecoder
     }
 
     fun genToken() {
         val hs256 = SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET)
-        val header: JWSHeader = hs256.jwsHeader { keyID("one") }
-        val claimsSet = jwtClaimSet {
+        val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
+        val claimsSet: JWTClaimsSet = jwtClaimSet {
             subject("test-subject")
             issueTime(Instant.now())
             expirationTime(Instant.now() + Duration.ofDays(1))
@@ -91,22 +113,4 @@ class SecurityConfig {
     }
 
 
-    /*
-    @Bean
-    fun jwtDecoder(
-        properties: OAuth2ResourceServerProperties,
-        @Value("\${auth0.audience}") audience: String?
-    ): JwtDecoder? {
-        // By default, Spring Security does not validate the "aud" claim of the token, to ensure that this token is
-        // indeed intended for our app. Adding our own validator is easy to do:
-        val issuerUri = properties.jwt.issuerUri
-        val jwtDecoder = JwtDecoders.fromOidcIssuerLocation(issuerUri) as NimbusJwtDecoder
-        val audienceValidator: OAuth2TokenValidator<Jwt> = AudienceValidator.of(audience)
-        val withIssuer: OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithIssuer(issuerUri)
-        val withAudience: OAuth2TokenValidator<Jwt> = DelegatingOAuth2TokenValidator<T>(withIssuer, audienceValidator)
-        jwtDecoder.setJwtValidator(withAudience)
-        return jwtDecoder
-    }
-
-     */
 }

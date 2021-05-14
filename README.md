@@ -6,7 +6,7 @@ let's check how to bearer-auth in 2021 :)
 - https://github.com/spring-projects/spring-security/blob/main/docs/manual/src/docs/asciidoc/_includes/servlet/oauth2/oauth2-resourceserver.adoc
 - https://github.com/hantsy/spring-security-auth0-sample/tree/master/api
 - https://github.com/hantsy/spring-security-auth0-sample/blob/master/docs/api.md
-
+- https://docs.spring.io/spring-security/site/docs/current/reference/html5/#oauth2resourceserver
 
 ## swagger:
 
