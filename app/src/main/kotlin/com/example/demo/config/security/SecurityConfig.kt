@@ -75,7 +75,7 @@ class SecurityConfig {
 
         val defaultValidator: OAuth2TokenValidator<Jwt> = JwtValidators.createDefault()
         val audiencesExpectedOneOf: List<String> = listOf("myaudience-1", "myaudience-2")
-        val issuersExpectedOneOf: List<String> = listOf("my-issuer-1", "my-issuer-2")
+        val issuersExpectedOneOf: List<String> = listOf("https://my-issuer-1.local", "https://my-issuer-2.local")
         val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = issuersExpectedOneOf)
             .toOAuth2TokenValidator()
         val audienceValidator: OAuth2TokenValidator<Jwt> =
@@ -97,7 +97,7 @@ class SecurityConfig {
             subject("test-subject")
             issueTime(Instant.now())
             expirationTime(Instant.now() + Duration.ofDays(1))
-            issuer("my-issuer-1")
+            issuer("https://my-issuer-1.local")
             audience(listOf("myaudience-1", "myaudience-2"))
         }
 

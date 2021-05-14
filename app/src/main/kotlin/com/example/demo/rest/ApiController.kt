@@ -5,10 +5,13 @@ import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import springfox.documentation.annotations.ApiIgnore
 import java.time.Duration
 import java.time.Instant
 
@@ -16,9 +19,22 @@ import java.time.Instant
 class ApiController {
 
     @GetMapping("/api/me")
-    fun me(): Any {
+    fun me(@ApiIgnore authentication: JwtAuthenticationToken): Any {
+
+        val jwt: Jwt = authentication.token
+
+
         return mapOf(
-            "foo" to "bar"
+            "foo" to "bar",
+            "auth" to mapOf(
+                "name" to authentication.name,
+                "authorities" to authentication.authorities,
+                "tokenAttributes" to authentication.tokenAttributes,
+                "token" to authentication.token as Jwt, // Jwt
+                "principal" to authentication.principal as Jwt, // Jwt
+                "credentials" to authentication.credentials as Jwt, // Jwt
+                "details" to authentication.details
+            )
         )
     }
 
@@ -28,7 +44,7 @@ class ApiController {
             subject("test-subject")
             issueTime(Instant.now())
             expirationTime(Instant.now() + Duration.ofDays(1))
-            issuer("my-issuer-1")
+            issuer("https://my-issuer-1.local")
             audience(listOf("myaudience-1", "myaudience-2"))
         }
 
