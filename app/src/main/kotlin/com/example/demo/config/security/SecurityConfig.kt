@@ -1,9 +1,6 @@
 package com.example.demo.config.security
 
 import com.example.demo.util.jwt.*
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
 import mu.KLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,8 +13,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtValidators
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
-import java.time.Duration
-import java.time.Instant
 
 
 /**
@@ -67,54 +62,31 @@ class SecurityConfig {
             .build()
     }
 
-    //@Bean
     private fun jwtDecoder(): JwtDecoder {
-        genToken()
         val jwtDecoder: NimbusJwtDecoder = SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET)
             .jwtDecoder()
+        jwtDecoder.setJwtValidator(jwtValidator())
+
+        return jwtDecoder
+    }
+
+    private fun jwtValidator(): DelegatingOAuth2TokenValidator<Jwt> {
+        val audiencesExpectedOneOf: List<String> = listOf("myaudience-1", "myaudience-2")
+        val issuersExpectedOneOf: List<String> = listOf(
+            "https://my-issuer-1.local",
+            "https://my-issuer-2.local"
+        )
 
         val defaultValidator: OAuth2TokenValidator<Jwt> = JwtValidators.createDefault()
-        val audiencesExpectedOneOf: List<String> = listOf("myaudience-1", "myaudience-2")
-        val issuersExpectedOneOf: List<String> = listOf("https://my-issuer-1.local", "https://my-issuer-2.local")
         val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = issuersExpectedOneOf)
             .toOAuth2TokenValidator()
         val audienceValidator: OAuth2TokenValidator<Jwt> =
             jwtAudienceClaimValidator(acceptAudiences = audiencesExpectedOneOf)
                 .toOAuth2TokenValidator()
 
-        val compoundValidator: DelegatingOAuth2TokenValidator<Jwt> = jwtCompoundOAuth2TokenValidator(
+        return jwtCompoundOAuth2TokenValidator(
             defaultValidator, issuerValidator, audienceValidator
         )
-        jwtDecoder.setJwtValidator(compoundValidator)
-
-        return jwtDecoder
-    }
-
-    fun genToken() {
-        val hs256 = SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET)
-        val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
-        val claimsSet: JWTClaimsSet = jwtClaimSet {
-            subject("test-subject")
-            issueTime(Instant.now())
-            expirationTime(Instant.now() + Duration.ofDays(1))
-            issuer("https://my-issuer-1.local")
-            audience(listOf("myaudience-1", "myaudience-2"))
-        }
-
-        val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
-        val signedJwtSerialized: String = signedJwt.serialize()
-        logger.info { "signed fake jwt ... $signedJwtSerialized" }
-        logger.info { "=====================" }
-        logger.info { "Bearer $signedJwtSerialized" }
-        logger.info { "=====================" }
-
-        val decoder: NimbusJwtDecoder = hs256.jwtDecoder()
-        val decoded: Jwt = decoder.decode(signedJwtSerialized)
-        val decodedSubject: String = decoded.subject
-        if (decodedSubject != "test-subject") {
-            error("wrong subject")
-        }
-
     }
 
 

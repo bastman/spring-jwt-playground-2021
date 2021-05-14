@@ -5,7 +5,9 @@ import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
+import mu.KLogging
 import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -17,12 +19,12 @@ import java.time.Instant
 
 @RestController
 class ApiController {
+    companion object : KLogging()
 
     @GetMapping("/api/me")
     fun me(@ApiIgnore authentication: JwtAuthenticationToken): Any {
 
         val jwt: Jwt = authentication.token
-
 
         return mapOf(
             "foo" to "bar",
@@ -52,6 +54,18 @@ class ApiController {
         val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
+
+        logger.info { "signed fake jwt ... $signedJwtSerialized" }
+        logger.info { "=====================" }
+        logger.info { "Bearer $signedJwtSerialized" }
+        logger.info { "=====================" }
+
+        val decoder: NimbusJwtDecoder = hs256.jwtDecoder()
+        val decoded: Jwt = decoder.decode(signedJwtSerialized)
+        val decodedSubject: String = decoded.subject
+        if (decodedSubject != "test-subject") {
+            error("wrong subject")
+        }
 
         return mapOf(
             "token" to "Bearer $signedJwtSerialized",
