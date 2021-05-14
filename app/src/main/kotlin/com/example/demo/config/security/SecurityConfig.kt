@@ -42,6 +42,9 @@ class SecurityConfig {
         "/configuration/security",
         "/swagger-ui.html",
         "/webjars/**",
+
+        // custom
+        "/token/**"
     )
 
     @Bean
@@ -94,6 +97,8 @@ class SecurityConfig {
             subject("test-subject")
             issueTime(Instant.now())
             expirationTime(Instant.now() + Duration.ofDays(1))
+            issuer("my-issuer-1")
+            audience(listOf("myaudience-1", "myaudience-2"))
         }
 
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
