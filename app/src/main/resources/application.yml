@@ -1,5 +1,10 @@
 spring:
+  profiles:
+    active: auth-fake
   autoconfigure:
     exclude:
       # get rid of "Using default security password" logs and basic auth defaults
       - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+app.auth:
+  foo: bar

@@ -1,6 +1,6 @@
 package com.example.demo.rest
 
-import com.example.demo.config.security.SecurityConfig
+import com.example.demo.config.security.jwt.MyAuthConfig
 import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
@@ -18,7 +18,9 @@ import java.time.Duration
 import java.time.Instant
 
 @RestController
-class ApiController {
+class ApiController(
+    private val myAuthConfig: MyAuthConfig
+) {
     companion object : KLogging()
 
     @GetMapping("/api/me")
@@ -45,15 +47,20 @@ class ApiController {
 
     @PostMapping("/token/example-token")
     fun generateExampleToken(): Any? {
+        val fakeAuthConfig: MyAuthConfig.JwtFake = when (myAuthConfig) {
+            is MyAuthConfig.JwtFake -> myAuthConfig
+            else -> error("endpoint forbidden by auth strategy.")
+        }
+
         val claimsSet: JWTClaimsSet = jwtClaimSet {
             subject("test-subject")
             issueTime(Instant.now())
             expirationTime(Instant.now() + Duration.ofDays(1))
-            issuer("https://my-issuer-1.local")
-            audience(listOf("myaudience-1", "myaudience-2"))
+            issuer(fakeAuthConfig.issuer)
+            audience(listOf(fakeAuthConfig.audience, "myaudience-2"))
         }
 
-        val hs256 = SymmetricSignedJwt.HS256(secret = SecurityConfig.JWT_FAKE_SECRET)
+        val hs256 = SymmetricSignedJwt.HS256(secret = fakeAuthConfig.hs256Secret)
         val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
@@ -84,12 +91,16 @@ class ApiController {
     fun signToken(
         @RequestBody payload: Map<String, Any?>
     ): Any? {
+        val fakeAuthConfig: MyAuthConfig.JwtFake = when (myAuthConfig) {
+            is MyAuthConfig.JwtFake -> myAuthConfig
+            else -> error("endpoint forbidden by auth strategy.")
+        }
         val claimsSet: JWTClaimsSet = jwtClaimSet {
             claims(payload)
             expirationTime(Instant.now() + Duration.ofDays(1))
         }
 
-        val hs256 = SymmetricSignedJwt.HS256(secret = SecurityConfig.JWT_FAKE_SECRET)
+        val hs256 = SymmetricSignedJwt.HS256(secret = fakeAuthConfig.hs256Secret)
         val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()

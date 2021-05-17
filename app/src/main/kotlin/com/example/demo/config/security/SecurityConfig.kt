@@ -1,15 +1,17 @@
 package com.example.demo.config.security
 
+import com.example.demo.config.security.jwt.MyAuthConfig
 import com.example.demo.util.jwt.*
 import mu.KLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.core.OAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
-import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.JwtDecoders
 import org.springframework.security.oauth2.jwt.JwtValidators
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.security.web.SecurityFilterChain
@@ -20,10 +22,10 @@ import org.springframework.security.web.SecurityFilterChain
  */
 
 @Configuration
-class SecurityConfig {
-    companion object : KLogging() {
-        val JWT_FAKE_SECRET = "foo - The secret length must be at least 256 bits"
-    }
+class SecurityConfig(
+    private val myAuthConfig: MyAuthConfig
+) {
+    companion object : KLogging()
 
     private val endpointsFullyAuthenticated: List<String> = listOf("/api/**")
     private val endpointsUnsecured: List<String> = listOf(
@@ -54,34 +56,65 @@ class SecurityConfig {
                     .antMatchers(*(endpointsFullyAuthenticated.toTypedArray())).fullyAuthenticated()
                     .anyRequest().authenticated()
             }
-            .oauth2ResourceServer { oauth2Conf ->
-                oauth2Conf.jwt {
-                    it.decoder(jwtDecoder())
-                }
-            }
+            .oauth2ResourceServer { resourceServer(it, myAuthConfig) }
             .build()
     }
 
-    private fun jwtDecoder(): JwtDecoder {
-        val jwtDecoder: NimbusJwtDecoder = SymmetricSignedJwt.HS256(secret = JWT_FAKE_SECRET)
-            .jwtDecoder()
-        jwtDecoder.setJwtValidator(jwtValidator())
-
-        return jwtDecoder
+    private fun resourceServer(rs: OAuth2ResourceServerConfigurer<HttpSecurity?>, myAuthConfig: MyAuthConfig) {
+        when (myAuthConfig) {
+            is MyAuthConfig.JwtFake -> fakeAuthResourceServer(rs, myAuthConfig)
+            is MyAuthConfig.JwtProd -> prodAuthResourceServer(rs, myAuthConfig)
+        }.let { Unit }
     }
 
-    private fun jwtValidator(): DelegatingOAuth2TokenValidator<Jwt> {
-        val audiencesExpectedOneOf: List<String> = listOf("myaudience-1", "myaudience-2")
-        val issuersExpectedOneOf: List<String> = listOf(
-            "https://my-issuer-1.local",
-            "https://my-issuer-2.local"
-        )
+    private fun fakeAuthResourceServer(
+        rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
+        myAuthConfig: MyAuthConfig.JwtFake
+    ) {
+        rs.jwt {
+            val validator = jwtValidator(
+                acceptIssuers = listOf(myAuthConfig.issuer),
+                acceptAudiences = listOf(myAuthConfig.audience)
+            )
+            val decoder = jwtDecoderFake(hs256Secret = myAuthConfig.hs256Secret)
+            decoder.setJwtValidator(validator)
+            it.decoder(decoder)
+        }
+    }
 
+    private fun prodAuthResourceServer(
+        rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
+        authConfig: MyAuthConfig.JwtProd
+    ) {
+        rs.jwt {
+            val validator = jwtValidator(
+                acceptIssuers = listOf(authConfig.issuer),
+                acceptAudiences = listOf(authConfig.audience)
+            )
+            val decoder = jwtDecoderProd(issuerUri = authConfig.issuer)
+            decoder.setJwtValidator(validator)
+            it.decoder(decoder)
+        }
+    }
+
+    private fun jwtDecoderProd(issuerUri: String): NimbusJwtDecoder {
+        return JwtDecoders.fromIssuerLocation(issuerUri) as NimbusJwtDecoder
+    }
+
+
+    private fun jwtDecoderFake(hs256Secret: String): NimbusJwtDecoder {
+        return SymmetricSignedJwt.HS256(secret = hs256Secret)
+            .jwtDecoder()
+    }
+
+    private fun jwtValidator(
+        acceptIssuers: List<String>, acceptAudiences: List<String>
+    ): DelegatingOAuth2TokenValidator<Jwt> {
         val defaultValidator: OAuth2TokenValidator<Jwt> = JwtValidators.createDefault()
-        val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = issuersExpectedOneOf)
+        val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = acceptIssuers)
             .toOAuth2TokenValidator()
         val audienceValidator: OAuth2TokenValidator<Jwt> =
-            jwtAudienceClaimValidator(acceptAudiences = audiencesExpectedOneOf)
+            jwtAudienceClaimValidator(acceptAudiences = acceptAudiences)
                 .toOAuth2TokenValidator()
 
         return jwtCompoundOAuth2TokenValidator(

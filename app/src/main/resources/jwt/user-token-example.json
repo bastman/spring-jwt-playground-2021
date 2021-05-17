@@ -10,8 +10,8 @@
   "iss": "https://my-issuer-1.local",
   "sub": "my-issuer-1|my-user-id-1",
   "aud": [
-    "myaudience-1",
-    "myaudience-2"
+    "my-audience-1",
+    "my-audience-2"
   ],
   "iat": 1604327123,
   "exp": 1604377523,
