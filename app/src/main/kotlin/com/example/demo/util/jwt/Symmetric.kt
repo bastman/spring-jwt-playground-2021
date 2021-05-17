@@ -15,7 +15,7 @@ object SymmetricSignedJwt {
 
     fun secretKeyAES(secret: String): SecretKey {
         val key: ByteArray = secret.toByteArray(Charsets.UTF_8)
-        return SecretKeySpec(key, 0, key.size, "AES")
+        return SecretKeySpec(key, 0, key.size, "HMAC")
     }
 
     class HS256(private val secret: String) {

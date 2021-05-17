@@ -22,7 +22,10 @@ class ApiController {
     companion object : KLogging()
 
     @GetMapping("/api/me")
-    fun me(@ApiIgnore authentication: JwtAuthenticationToken): Any {
+    fun me(
+        @ApiIgnore authentication: JwtAuthenticationToken
+        // ,@ApiIgnore @AuthenticationPrincipal  oidcUser: OidcUser
+    ): Any {
 
         val jwt: Jwt = authentication.token
 
