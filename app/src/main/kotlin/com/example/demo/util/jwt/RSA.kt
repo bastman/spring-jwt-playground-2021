@@ -1,10 +1,17 @@
 package com.example.demo.util.jwt
 
+import com.nimbusds.jose.JOSEObjectType
+import com.nimbusds.jose.JWSAlgorithm
+import com.nimbusds.jose.JWSHeader
+import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.JWKSelector
 import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jose.jwk.source.JWKSource
 import com.nimbusds.jose.proc.SecurityContext
+import com.nimbusds.jwt.JWTClaimsSet
+import com.nimbusds.jwt.SignedJWT
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -31,8 +38,33 @@ object RSA {
             .build()
     }
 
-    fun jwkSource(): JWKSource<SecurityContext> {
-        val rsaKey: RSAKey = generateRSAKey()
+    fun jwsHeader(rsaKey:RSAKey, block: JWSHeader.Builder.() -> Unit): JWSHeader {
+        val jwsAlgorithm= JWSAlgorithm.RS256
+            return JWSHeader.Builder(jwsAlgorithm)
+                .apply {
+                    this.keyID(rsaKey.keyID)
+                    this.type(JOSEObjectType.JWT)
+                }
+                .apply(block)
+                .build()
+        }
+
+    fun jwsSigner(rsaKey:RSAKey):RSASSASigner = RSASSASigner(rsaKey)
+
+    fun signedJwt(rsaSigner: RSASSASigner, header: JWSHeader, claimsSet: JWTClaimsSet): SignedJWT {
+            val signedJWT = SignedJWT(header, claimsSet)
+            signedJWT.sign(rsaSigner)
+            return signedJWT
+        }
+
+    fun jwtDecoder(rsaKey:RSAKey): NimbusJwtDecoder {
+        return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
+            .build()
+
+    }
+
+
+    fun jwkSource(rsaKey: RSAKey): JWKSource<SecurityContext> {
         val jwkSet = JWKSet(rsaKey)
 
         return JWKSource<SecurityContext> { jwkSelector: JWKSelector, _: SecurityContext ->

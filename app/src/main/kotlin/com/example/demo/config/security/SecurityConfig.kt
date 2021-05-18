@@ -35,7 +35,8 @@ class SecurityConfig(
         "/webjars/**",
 
         // custom
-        "/token/**"
+        "/token/**",
+        "/.well-known/**"
     )
 
     @Bean
