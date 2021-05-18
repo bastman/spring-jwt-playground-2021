@@ -30,6 +30,19 @@ enter "Bearer <your jwt>".
 click "login"
 ```
 
+### curl
+
+```
+# requires profile: auth-fake
+
+$ curl -v -X POST "http://localhost:8080/token/example-token"
+--> returns a self-signed jwt
+
+$ curl -X GET "http://localhost:8080/api/me" -H "Authorization: Bearer <your token>"
+
+
+```
+
 ## see
 - https://itnext.io/secures-rest-apis-with-spring-security-5-and-auth0-41d579ca1e27
 - https://github.com/spring-projects/spring-security/blob/main/docs/manual/src/docs/asciidoc/_includes/servlet/oauth2/oauth2-resourceserver.adoc
@@ -54,7 +67,7 @@ click "login"
 
 
 
-## minimalistic example ...
+## alternatives - the minimalistic example ...
  ```
  
 @Bean
@@ -69,7 +82,6 @@ click "login"
                     .antMatchers(*(endpointsFullyAuthenticated.toTypedArray())).fullyAuthenticated()
                     .anyRequest().authenticated()
             }
-           // .oauth2ResourceServer { resourceServer(it, myAuthConfig) }
             .oauth2ResourceServer { superSimpleResourceServer(it) }
             .build()
     }
