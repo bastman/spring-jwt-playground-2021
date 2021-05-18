@@ -1,6 +1,12 @@
 # spring-jwt-playground-2021
 let's check how to bearer-auth in 2021 :)
 
+## scope
+- single-tenant resource-server
+- validate jwt claims: exp, iss, aud 
+- show-case self-signed jwt - to simplify development
+
+
 ## how to run? 
 
 ### profiles
@@ -13,15 +19,16 @@ let's check how to bearer-auth in 2021 :)
 -D.spring.profiles.active=auth-fake
 ```
 
-
-
 ### swagger:
 
 - http://localhost:8080/v2/api-docs
 - http://localhost:8080/swagger-ui.html
 
-
-
+```
+click "authorize". 
+enter "Bearer <your jwt>". 
+click "login"
+```
 
 ## see
 - https://itnext.io/secures-rest-apis-with-spring-security-5-and-auth0-41d579ca1e27
