@@ -5,6 +5,7 @@ let's check how to bearer-auth in 2021 :)
 - single-tenant resource-server
 - validate jwt claims: exp, iss, aud 
 - show-case self-signed jwt - to simplify development
+- spring boot (mvc)
 
 
 ## how to run? 
