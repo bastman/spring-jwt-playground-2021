@@ -1,6 +1,28 @@
 # spring-jwt-playground-2021
 let's check how to bearer-auth in 2021 :)
 
+## how to run? 
+
+### profiles
+
+- auth-prod: requires issuer-uri + audience as env variables
+- auth-fake: accepts/generates self-signed jwt (HS256). Do not use in production!
+
+```
+-D.spring.profiles.active=auth-prod
+-D.spring.profiles.active=auth-fake
+```
+
+
+
+### swagger:
+
+- http://localhost:8080/v2/api-docs
+- http://localhost:8080/swagger-ui.html
+
+
+
+
 ## see
 - https://itnext.io/secures-rest-apis-with-spring-security-5-and-auth0-41d579ca1e27
 - https://github.com/spring-projects/spring-security/blob/main/docs/manual/src/docs/asciidoc/_includes/servlet/oauth2/oauth2-resourceserver.adoc
@@ -22,10 +44,7 @@ let's check how to bearer-auth in 2021 :)
 - https://github.com/spring-projects-experimental/spring-authorization-server/blob/main/oauth2-authorization-server/src/test/java/org/springframework/security/config/annotation/web/configurers/oauth2/server/authorization/JwkSetTests.java    
 - https://github.com/spring-projects-experimental/spring-authorization-server/blob/5e0fe9c8622b6f31de86e981cb10f0e425c425a3/oauth2-authorization-server/src/test/java/org/springframework/security/oauth2/server/authorization/web/NimbusJwkSetEndpointFilterTests.java
 
-## swagger:
 
-- http://localhost:8080/v2/api-docs
-- http://localhost:8080/swagger-ui.html
 
 
 ## minimalistic example ...
