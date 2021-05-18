@@ -26,3 +26,37 @@ let's check how to bearer-auth in 2021 :)
 
 - http://localhost:8080/v2/api-docs
 - http://localhost:8080/swagger-ui.html
+
+
+## minimalistic example ...
+ ```
+ 
+@Bean
+    fun springWebFilterChain(http: HttpSecurity): SecurityFilterChain {
+        return http
+            .httpBasic { it.disable() }
+            .csrf { it.disable() }
+            .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
+            .authorizeRequests {
+                it
+                    .antMatchers(*(endpointsUnsecured.toTypedArray())).permitAll()
+                    .antMatchers(*(endpointsFullyAuthenticated.toTypedArray())).fullyAuthenticated()
+                    .anyRequest().authenticated()
+            }
+           // .oauth2ResourceServer { resourceServer(it, myAuthConfig) }
+            .oauth2ResourceServer { superSimpleResourceServer(it) }
+            .build()
+    }
+
+    private fun superSimpleResourceServer(rs: OAuth2ResourceServerConfigurer<HttpSecurity?>) {
+        val issuer = "https://my-issuer.example.com/"
+        val validator:OAuth2TokenValidator<Jwt> = JwtValidators.createDefaultWithIssuer(issuer)
+        // note: does not validate audience
+        val decoder:NimbusJwtDecoder = JwtDecoders.fromIssuerLocation(issuer) as NimbusJwtDecoder
+        decoder.setJwtValidator(validator)
+        rs.jwt {
+            it.decoder(decoder)
+        }
+    } 
+ 
+ ```

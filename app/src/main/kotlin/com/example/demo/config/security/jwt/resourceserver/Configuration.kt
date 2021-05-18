@@ -1,4 +1,4 @@
-package com.example.demo.config.security.jwt
+package com.example.demo.config.security.jwt.resourceserver
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName

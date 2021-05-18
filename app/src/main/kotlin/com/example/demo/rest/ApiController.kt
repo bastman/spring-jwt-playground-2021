@@ -1,6 +1,6 @@
 package com.example.demo.rest
 
-import com.example.demo.config.security.jwt.MyAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
 import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jwt.JWTClaimsSet
