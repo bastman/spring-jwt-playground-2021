@@ -15,6 +15,8 @@ let's check how to bearer-auth in 2021 :)
 - auth-fake: accepts/generates self-signed jwt (HS256). Do not use in production!
 
 ```
+VM Options:
+
 -D.spring.profiles.active=auth-prod
 -D.spring.profiles.active=auth-fake
 ```
