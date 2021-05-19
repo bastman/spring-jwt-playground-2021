@@ -19,7 +19,8 @@ object JwtResourceServerFakeRSA256 : KLogging() {
     fun configure(
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
         issuer: String,
-        audience: String
+        audience: String,
+        rsaKey: RSAKey
     ) {
         rs.jwt {
             val validator: DelegatingOAuth2TokenValidator<Jwt> = JwtResourceServerCommon.jwtValidator(
@@ -27,7 +28,7 @@ object JwtResourceServerFakeRSA256 : KLogging() {
                 acceptAudiences = listOf(audience)
             )
             val decoder: NimbusJwtDecoder = jwtDecoder(
-                rsaPublicKey = JwtAuthorizationServerFakeRSA256.RSA_KEY.toRSAPublicKey()
+                rsaPublicKey = rsaKey.toRSAPublicKey()
             )
             decoder.setJwtValidator(validator)
             it.decoder(decoder)

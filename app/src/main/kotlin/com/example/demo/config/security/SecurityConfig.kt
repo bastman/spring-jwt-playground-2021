@@ -4,6 +4,7 @@ import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerFake
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerHS256
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerProd
 import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
+import com.example.demo.util.jwt.RSA
 import mu.KLogging
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -61,7 +62,12 @@ class SecurityConfig(
             is MyAuthConfig.JwtProd -> JwtResourceServerProd
                 .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
             is MyAuthConfig.JwtFakeRSA256 -> JwtResourceServerFakeRSA256
-                .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
+                .configure(
+                    rs = rs,
+                    issuer = authConfig.issuer,
+                    audience = authConfig.audience,
+                    rsaKey = RSA.rsaKeyFromJsonStringB64(rsaKeyB64 = authConfig.rsaKeyB64)
+                )
             is MyAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
                 .configure(
                     rs = rs,

@@ -73,4 +73,21 @@ object RSA {
             )
         }
     }
+
+
+    fun getPublicJWKSasJsonString(rsaKey: RSAKey): String {
+        // exposes public keys only
+        val jwkSet = JWKSet(rsaKey)
+        return jwkSet.toPublicJWKSet().toJSONObject(true).toJSONString()
+    }
+
+    fun rsaKeyFromJsonStringB64(rsaKeyB64: String): RSAKey {
+        val rsaKeyJson: String = Base64.getDecoder().decode(rsaKeyB64).decodeToString()
+        return RSAKey.parse(rsaKeyJson)
+    }
+
+    /*
+
+     */
+
 }

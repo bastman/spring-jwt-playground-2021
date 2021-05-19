@@ -1,16 +1,15 @@
 package com.example.demo.rest.authorizationserver
 
 
-import com.example.demo.config.security.jwt.resourceserver.JwtAuthorizationServerFakeRSA256
 import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
 import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.jwk.JWKSet
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import mu.KLogging
+import net.minidev.json.JSONObject
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import java.time.Instant
+import java.util.*
 
 @RestController
 class FakeAuthorizationServerApiController(
@@ -26,17 +26,44 @@ class FakeAuthorizationServerApiController(
 ) {
     companion object : KLogging()
 
-    private val rsaKey: RSAKey = JwtAuthorizationServerFakeRSA256.RSA_KEY
-
-
     /**
      * authorization server
      * see: https://github.com/spring-projects-experimental/spring-authorization-server/blob/main/oauth2-authorization-server/src/main/java/org/springframework/security/oauth2/server/authorization/web/NimbusJwkSetEndpointFilter.java
      */
     @GetMapping("/.well-known/jwks.json")
     fun getJWKS(): Any? {
-        val jwkSet = JWKSet(rsaKey)
-        return jwkSet.toString() // exposes public keys only
+        return when (val it = myAuthConfig) {
+            is MyAuthConfig.JwtFakeRSA256 -> RSA.getPublicJWKSasJsonString(it.rsaKey)
+            else -> error("rsa authorization server - disabled")
+        }
+    }
+
+    @PostMapping("/token/generate-rsa-keys")
+    fun generateRSAKeys(): Any? {
+        val newRSAKey = RSA.generateRSAKey()
+        val pubKey = newRSAKey.toRSAPublicKey()
+        val privKey = newRSAKey.toRSAPrivateKey()
+
+        val jsonObject: JSONObject = newRSAKey.toJSONObject()
+        val rsaKey2 = RSAKey.parse(jsonObject)
+        val pubKey2 = rsaKey2.toRSAPublicKey()
+        val privKey2 = rsaKey2.toRSAPrivateKey()
+        println("====== pub key =====")
+        println(pubKey2)
+        println("====== priv key =====")
+        println(privKey2)
+
+        if (pubKey2 != pubKey) {
+            error("pub key does not match")
+        }
+        if (privKey2 != privKey) {
+            error("priv key does not match")
+        }
+        val rsaKeyJson: String = jsonObject.toJSONString()
+        return mapOf(
+            "rsaKeyB64" to Base64.getEncoder().encodeToString(rsaKeyJson.toByteArray()),
+            "rsaKey" to jsonObject
+        )
     }
 
     @PostMapping("/token/example-token")
@@ -63,7 +90,7 @@ class FakeAuthorizationServerApiController(
         val signedJwt: SignedJWT = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> error("endpoint not enabled")
             is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(rsaKey, claimsSet)
+            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 
@@ -89,7 +116,7 @@ class FakeAuthorizationServerApiController(
         val signedJwt: SignedJWT = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> error("endpoint not enabled")
             is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(rsaKey, claimsSet)
+            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 

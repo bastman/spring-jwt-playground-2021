@@ -1,10 +1,12 @@
 package com.example.demo.config.security.jwt.resourceserver
 
+import com.example.demo.util.jwt.RSA
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nimbusds.jose.jwk.RSAKey
 import org.springframework.boot.context.properties.bind.Bindable
 import org.springframework.boot.context.properties.bind.Binder
 import org.springframework.context.annotation.Bean
@@ -38,8 +40,14 @@ sealed class MyAuthConfig(
     @JsonTypeName("JwtFakeRSA256")
     data class JwtFakeRSA256(
         val issuer: String,
-        val audience: String
-    ) : MyAuthConfig()
+        val audience: String,
+        val rsaKeyB64: String
+    ) : MyAuthConfig() {
+
+        val rsaKey: RSAKey by lazy {
+            RSA.rsaKeyFromJsonStringB64(rsaKeyB64 = rsaKeyB64)
+        }
+    }
 
 }
 
