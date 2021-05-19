@@ -38,26 +38,26 @@ object RSA {
             .build()
     }
 
-    fun jwsHeader(rsaKey:RSAKey, block: JWSHeader.Builder.() -> Unit): JWSHeader {
-        val jwsAlgorithm= JWSAlgorithm.RS256
-            return JWSHeader.Builder(jwsAlgorithm)
-                .apply {
-                    this.keyID(rsaKey.keyID)
-                    this.type(JOSEObjectType.JWT)
-                }
-                .apply(block)
-                .build()
-        }
+    fun jwsHeader(rsaKey: RSAKey, block: JWSHeader.Builder.() -> Unit): JWSHeader {
+        val jwsAlgorithm = JWSAlgorithm.RS256
+        return JWSHeader.Builder(jwsAlgorithm)
+            .apply {
+                this.keyID(rsaKey.keyID)
+                this.type(JOSEObjectType.JWT)
+            }
+            .apply(block)
+            .build()
+    }
 
-    fun jwsSigner(rsaKey:RSAKey):RSASSASigner = RSASSASigner(rsaKey)
+    fun jwsSigner(rsaKey: RSAKey): RSASSASigner = RSASSASigner(rsaKey)
 
     fun signedJwt(rsaSigner: RSASSASigner, header: JWSHeader, claimsSet: JWTClaimsSet): SignedJWT {
-            val signedJWT = SignedJWT(header, claimsSet)
-            signedJWT.sign(rsaSigner)
-            return signedJWT
-        }
+        val signedJWT = SignedJWT(header, claimsSet)
+        signedJWT.sign(rsaSigner)
+        return signedJWT
+    }
 
-    fun jwtDecoder(rsaKey:RSAKey): NimbusJwtDecoder {
+    fun jwtDecoder(rsaKey: RSAKey): NimbusJwtDecoder {
         return NimbusJwtDecoder.withPublicKey(rsaKey.toRSAPublicKey())
             .build()
 

@@ -28,11 +28,17 @@ sealed class MyAuthConfig(
         val audience: String
     ) : MyAuthConfig()
 
-    @JsonTypeName("JwtFake")
-    data class JwtFake(
+    @JsonTypeName("JwtFakeHS256")
+    data class JwtFakeHS256(
         val issuer: String,
         val audience: String,
         val hs256Secret: String,
+    ) : MyAuthConfig()
+
+    @JsonTypeName("JwtFakeRSA256")
+    data class JwtFakeRSA256(
+        val issuer: String,
+        val audience: String
     ) : MyAuthConfig()
 
 }

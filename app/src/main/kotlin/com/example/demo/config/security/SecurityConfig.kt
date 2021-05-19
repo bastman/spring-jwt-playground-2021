@@ -1,5 +1,6 @@
 package com.example.demo.config.security
 
+import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerFakeRSA256
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerHS256
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerProd
 import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
@@ -59,7 +60,9 @@ class SecurityConfig(
         when (authConfig) {
             is MyAuthConfig.JwtProd -> JwtResourceServerProd
                 .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
-            is MyAuthConfig.JwtFake -> JwtResourceServerHS256
+            is MyAuthConfig.JwtFakeRSA256 -> JwtResourceServerFakeRSA256
+                .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
+            is MyAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
                 .configure(
                     rs = rs,
                     issuer = authConfig.issuer,
