@@ -4,7 +4,6 @@ package com.example.demo.rest.authorizationserver
 import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
 import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.crypto.RSASSASigner
 import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
@@ -33,14 +32,14 @@ class FakeAuthorizationServerApiController(
     @GetMapping("/.well-known/jwks.json")
     fun getJWKS(): Any? {
         return when (val it = myAuthConfig) {
-            is MyAuthConfig.JwtFakeRSA256 -> RSA.getPublicJWKSasJsonString(it.rsaKey)
+            is MyAuthConfig.JwtFakeRSA256 -> it.rsaKey.toPublicJWKSetJSONString()
             else -> error("rsa authorization server - disabled")
         }
     }
 
     @PostMapping("/token/generate-rsa-keys")
     fun generateRSAKeys(): Any? {
-        val newRSAKey = RSA.generateRSAKey()
+        val newRSAKey = RSAKeyFactory.generateRSAKey()
         val pubKey = newRSAKey.toRSAPublicKey()
         val privKey = newRSAKey.toRSAPrivateKey()
 
@@ -149,20 +148,19 @@ class FakeAuthorizationServerApiController(
     }
 
     private fun signedJwtRSA256(rsaKey: RSAKey, claimsSet: JWTClaimsSet): SignedJWT {
-        val header: JWSHeader = RSA.jwsHeader(rsaKey) {}
-        val rsaSigner: RSASSASigner = RSA.jwsSigner(rsaKey)
-        val signedJwt: SignedJWT = RSA.signedJwt(rsaSigner, header, claimsSet)
+        val rs = JwtRSA256(rsaKey)
+        val header: JWSHeader = rs.jwsHeader() {}
+        val signedJwt: SignedJWT = rs.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
-
         logger.info { "signed fake jwt (RSA256) ... $signedJwtSerialized" }
         logger.info { "=====================" }
         logger.info { "Bearer $signedJwtSerialized" }
-        logger.info { "=====================" }
 
         // check decoding works ...
-        val decoder: NimbusJwtDecoder = RSA.jwtDecoder(rsaKey)
+        val decoder: NimbusJwtDecoder = rs.jwtDecoder() {}
         val decoded: Jwt = decoder.decode(signedJwtSerialized)
-
+        logger.info { "decoding works. claims: ${decoded.claims}" }
+        logger.info { "=====================" }
         return signedJwt
     }
 

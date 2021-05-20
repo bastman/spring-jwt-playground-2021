@@ -1,6 +1,6 @@
 package com.example.demo.config.security.jwt.resourceserver
 
-import com.example.demo.util.jwt.RSA
+import com.example.demo.util.jwt.RSAKeyFactory
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -45,7 +45,7 @@ sealed class MyAuthConfig(
     ) : MyAuthConfig() {
 
         val rsaKey: RSAKey by lazy {
-            RSA.rsaKeyFromJsonStringB64(rsaKeyB64 = rsaKeyB64)
+            RSAKeyFactory.rsaKeyOfB64String(rsaKeyB64 = rsaKeyB64)
         }
     }
 

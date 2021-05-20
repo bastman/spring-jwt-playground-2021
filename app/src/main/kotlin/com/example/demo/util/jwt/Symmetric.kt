@@ -13,14 +13,14 @@ import javax.crypto.spec.SecretKeySpec
 
 object SymmetricSignedJwt {
 
-    fun secretKeyAES(secret: String): SecretKey {
+    fun secretKey(secret: String): SecretKey {
         val key: ByteArray = secret.toByteArray(Charsets.UTF_8)
         return SecretKeySpec(key, 0, key.size, "HMAC")
     }
 
     class HS256(private val secret: String) {
-        private val secretKeyAES: SecretKey = secretKeyAES(secret = secret)
-        private val signerMAC: JWSSigner = MACSigner(secretKeyAES)
+        private val secretKey: SecretKey = secretKey(secret = secret)
+        private val signerMAC: JWSSigner = MACSigner(secretKey)
         private val jwsAlgorithm: JWSAlgorithm = JWSAlgorithm.HS256
         private val macAlgorithm: MacAlgorithm = MacAlgorithm.HS256
 
@@ -43,7 +43,7 @@ object SymmetricSignedJwt {
 
         fun jwtDecoder(block: JwtDecoderBuilder? = null): NimbusJwtDecoder {
             return NimbusJwtDecoder
-                .withSecretKey(secretKeyAES)
+                .withSecretKey(secretKey)
                 .macAlgorithm(macAlgorithm)
                 .let {
                     if (block != null) {

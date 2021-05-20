@@ -1,4 +1,4 @@
-package com.example.demo.rest
+package com.example.demo.rest.resourceserver
 
 import mu.KLogging
 import org.springframework.security.oauth2.jwt.Jwt
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 import springfox.documentation.annotations.ApiIgnore
 
 @RestController
-class ApiController(
+class ResourceServerApiController(
 ) {
     companion object : KLogging()
 

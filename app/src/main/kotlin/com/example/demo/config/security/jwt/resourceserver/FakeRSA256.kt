@@ -1,6 +1,5 @@
 package com.example.demo.config.security.jwt.resourceserver
 
-import com.example.demo.util.jwt.RSA
 import com.nimbusds.jose.jwk.RSAKey
 import mu.KLogging
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -9,10 +8,6 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import java.security.interfaces.RSAPublicKey
-
-object JwtAuthorizationServerFakeRSA256 {
-    val RSA_KEY: RSAKey = RSA.generateRSAKey()
-}
 
 object JwtResourceServerFakeRSA256 : KLogging() {
 

@@ -1,4 +1,3 @@
-
 app.auth:
   strategy: JwtFakeRSA256
   # issuer: e.g.: https://<your_domain>.eu.auth0.com/

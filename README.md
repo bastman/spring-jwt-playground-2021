@@ -4,7 +4,7 @@ let's check how to bearer-auth in 2021 :)
 ## scope
 - single-tenant resource-server
 - validate jwt claims: exp, iss, aud 
-- show-case self-signed jwt - to simplify development
+- fake authorization server: show-case self-signed jwt - to simplify development
 - spring boot (mvc)
 
 
@@ -13,13 +13,14 @@ let's check how to bearer-auth in 2021 :)
 ### profiles
 
 - auth-prod: requires issuer-uri + audience as env variables
-- auth-fake: accepts/generates self-signed jwt (HS256). Do not use in production!
+- auth-fake: accepts/generates self-signed jwt (HS256, RS256). Do not use in production!
 
 ```
 VM Options:
 
 -D.spring.profiles.active=auth-prod
--D.spring.profiles.active=auth-fake
+-D.spring.profiles.active=auth-fakeRSA256
+-D.spring.profiles.active=auth-fakeHS256
 ```
 
 ### swagger:
@@ -36,7 +37,7 @@ click "login"
 ### curl
 
 ```
-# requires profile: auth-fake
+# requires profile: auth-fakeRSA256  (or auth-fakeHS256)
 
 $ curl -v -X POST "http://localhost:8080/token/example-token"
 --> returns a self-signed jwt
