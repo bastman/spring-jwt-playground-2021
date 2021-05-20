@@ -8,7 +8,6 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import mu.KLogging
-import net.minidev.json.JSONObject
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 
 @RestController
 class FakeAuthorizationServerApiController(
@@ -39,29 +37,10 @@ class FakeAuthorizationServerApiController(
 
     @PostMapping("/token/generate-rsa-keys")
     fun generateRSAKeys(): Any? {
-        val newRSAKey = RSAKeyFactory.generateRSAKey()
-        val pubKey = newRSAKey.toRSAPublicKey()
-        val privKey = newRSAKey.toRSAPrivateKey()
-
-        val jsonObject: JSONObject = newRSAKey.toJSONObject()
-        val rsaKey2 = RSAKey.parse(jsonObject)
-        val pubKey2 = rsaKey2.toRSAPublicKey()
-        val privKey2 = rsaKey2.toRSAPrivateKey()
-        println("====== pub key =====")
-        println(pubKey2)
-        println("====== priv key =====")
-        println(privKey2)
-
-        if (pubKey2 != pubKey) {
-            error("pub key does not match")
-        }
-        if (privKey2 != privKey) {
-            error("priv key does not match")
-        }
-        val rsaKeyJson: String = jsonObject.toJSONString()
+        val newRSAKey: RSAKey = RSAKeyFactory.generateRSAKey()
         return mapOf(
-            "rsaKeyB64" to Base64.getEncoder().encodeToString(rsaKeyJson.toByteArray()),
-            "rsaKey" to jsonObject
+            "rsaKeyB64" to newRSAKey.toRSAKeyB64String(),
+            "rsaKey" to newRSAKey.toJSONObject()
         )
     }
 
@@ -128,9 +107,8 @@ class FakeAuthorizationServerApiController(
         )
     }
 
-
     private fun signedJwtHS256(hs256Secret: String, claimsSet: JWTClaimsSet): SignedJWT {
-        val hs256 = SymmetricSignedJwt.HS256(secret = hs256Secret)
+        val hs256 = JwtHS256(secret = hs256Secret)
         val header: JWSHeader = hs256.jwsHeader { keyID("my-example-key-id") }
         val signedJwt: SignedJWT = hs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
@@ -141,26 +119,29 @@ class FakeAuthorizationServerApiController(
         logger.info { "=====================" }
 
         // check decoding works ...
-        val decoder: NimbusJwtDecoder = hs256.jwtDecoder()
+        val decoder: NimbusJwtDecoder = hs256.jwtDecoder {}
         val decoded: Jwt = decoder.decode(signedJwtSerialized)
+        logger.info { "decoding works. claims: ${decoded.claims}" }
+        logger.info { "=====================" }
 
         return signedJwt
     }
 
     private fun signedJwtRSA256(rsaKey: RSAKey, claimsSet: JWTClaimsSet): SignedJWT {
-        val rs = JwtRSA256(rsaKey)
-        val header: JWSHeader = rs.jwsHeader() {}
-        val signedJwt: SignedJWT = rs.signedJwt(header, claimsSet)
+        val rs256 = JwtRSA256(rsaKey)
+        val header: JWSHeader = rs256.jwsHeader() {}
+        val signedJwt: SignedJWT = rs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
         logger.info { "signed fake jwt (RSA256) ... $signedJwtSerialized" }
         logger.info { "=====================" }
         logger.info { "Bearer $signedJwtSerialized" }
 
         // check decoding works ...
-        val decoder: NimbusJwtDecoder = rs.jwtDecoder() {}
+        val decoder: NimbusJwtDecoder = rs256.jwtDecoder() {}
         val decoded: Jwt = decoder.decode(signedJwtSerialized)
         logger.info { "decoding works. claims: ${decoded.claims}" }
         logger.info { "=====================" }
+
         return signedJwt
     }
 

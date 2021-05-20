@@ -1,6 +1,6 @@
 package com.example.demo.config.security.jwt.resourceserver
 
-import com.example.demo.util.jwt.SymmetricSignedJwt
+import com.example.demo.util.jwt.JwtHS256
 import mu.KLogging
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer
@@ -30,8 +30,7 @@ object JwtResourceServerHS256 : KLogging() {
         logger.info { "=> accept issuer: $issuer audience: $audience" }
     }
 
-    private fun jwtDecoder(hs256Secret: String): NimbusJwtDecoder {
-        return SymmetricSignedJwt.HS256(secret = hs256Secret)
-            .jwtDecoder()
-    }
+    private fun jwtDecoder(hs256Secret: String): NimbusJwtDecoder = JwtHS256(secret = hs256Secret)
+        .jwtDecoder {}
+
 }

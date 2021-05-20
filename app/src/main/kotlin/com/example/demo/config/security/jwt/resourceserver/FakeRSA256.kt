@@ -1,5 +1,6 @@
 package com.example.demo.config.security.jwt.resourceserver
 
+import com.example.demo.util.jwt.JwtRSA256
 import com.nimbusds.jose.jwk.RSAKey
 import mu.KLogging
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -7,7 +8,6 @@ import org.springframework.security.config.annotation.web.configurers.oauth2.ser
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
-import java.security.interfaces.RSAPublicKey
 
 object JwtResourceServerFakeRSA256 : KLogging() {
 
@@ -22,9 +22,7 @@ object JwtResourceServerFakeRSA256 : KLogging() {
                 acceptIssuers = listOf(issuer),
                 acceptAudiences = listOf(audience)
             )
-            val decoder: NimbusJwtDecoder = jwtDecoder(
-                rsaPublicKey = rsaKey.toRSAPublicKey()
-            )
+            val decoder: NimbusJwtDecoder = jwtDecoder(rsaKey)
             decoder.setJwtValidator(validator)
             it.decoder(decoder)
         }
@@ -32,6 +30,11 @@ object JwtResourceServerFakeRSA256 : KLogging() {
         logger.info { "=> accept issuer: $issuer audience: $audience" }
     }
 
+    private fun jwtDecoder(rsaKey: RSAKey): NimbusJwtDecoder = JwtRSA256
+        .of(rsaKey)
+        .jwtDecoder {}
+
+    /*
     private fun jwtDecoder(rsaPublicKey: RSAPublicKey): NimbusJwtDecoder {
         return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build()
     }
@@ -40,4 +43,5 @@ object JwtResourceServerFakeRSA256 : KLogging() {
         // e.g.: "http://localhost:8080/.well-known/jwks.json"
         return NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build()
     }
+     */
 }
