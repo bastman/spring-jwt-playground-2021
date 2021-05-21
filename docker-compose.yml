@@ -6,8 +6,7 @@ services:
       - "8080:8080"
     environment:
       - "SPRING_PROFILES_ACTIVE=auth-fakeRS256"
-    command: [
-        "java",
-        "org.springframework.boot.loader.JarLauncher",
-        "-Dspring.profiles.active=playground,auth0-dev,flyway-migrate"
-    ]
+#    command: [
+#        "java",
+#        "org.springframework.boot.loader.JarLauncher"
+#    ]
