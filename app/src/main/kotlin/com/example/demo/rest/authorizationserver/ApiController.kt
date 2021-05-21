@@ -30,7 +30,7 @@ class FakeAuthorizationServerApiController(
     @GetMapping("/.well-known/jwks.json")
     fun getJWKS(): Any? {
         return when (val it = myAuthConfig) {
-            is MyAuthConfig.JwtFakeRSA256 -> it.rsaKey.toPublicJWKSetJSONString()
+            is MyAuthConfig.JwtFakeRS256 -> it.rsaKey.toPublicJWKSetJSONString()
             else -> error("rsa authorization server - disabled")
         }
     }
@@ -49,12 +49,12 @@ class FakeAuthorizationServerApiController(
         val jwtIssuer: String = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> myAuthConfig.issuer
             is MyAuthConfig.JwtFakeHS256 -> myAuthConfig.issuer
-            is MyAuthConfig.JwtFakeRSA256 -> myAuthConfig.issuer
+            is MyAuthConfig.JwtFakeRS256 -> myAuthConfig.issuer
         }
         val jwtAudience: String = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> myAuthConfig.audience
             is MyAuthConfig.JwtFakeHS256 -> myAuthConfig.audience
-            is MyAuthConfig.JwtFakeRSA256 -> myAuthConfig.audience
+            is MyAuthConfig.JwtFakeRS256 -> myAuthConfig.audience
         }
 
         val claimsSet: JWTClaimsSet = jwtClaimSet {
@@ -68,7 +68,7 @@ class FakeAuthorizationServerApiController(
         val signedJwt: SignedJWT = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> error("endpoint not enabled")
             is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(myAuthConfig.rsaKey, claimsSet)
+            is MyAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 
@@ -94,7 +94,7 @@ class FakeAuthorizationServerApiController(
         val signedJwt: SignedJWT = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> error("endpoint not enabled")
             is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRSA256 -> signedJwtRSA256(myAuthConfig.rsaKey, claimsSet)
+            is MyAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 
@@ -127,12 +127,12 @@ class FakeAuthorizationServerApiController(
         return signedJwt
     }
 
-    private fun signedJwtRSA256(rsaKey: RSAKey, claimsSet: JWTClaimsSet): SignedJWT {
-        val rs256 = JwtRSA256(rsaKey)
+    private fun signedJwtRS256(rsaKey: RSAKey, claimsSet: JWTClaimsSet): SignedJWT {
+        val rs256 = JwtRS256(rsaKey)
         val header: JWSHeader = rs256.jwsHeader() {}
         val signedJwt: SignedJWT = rs256.signedJwt(header, claimsSet)
         val signedJwtSerialized: String = signedJwt.serialize()
-        logger.info { "signed fake jwt (RSA256) ... $signedJwtSerialized" }
+        logger.info { "signed fake jwt (RSA56) ... $signedJwtSerialized" }
         logger.info { "=====================" }
         logger.info { "Bearer $signedJwtSerialized" }
 

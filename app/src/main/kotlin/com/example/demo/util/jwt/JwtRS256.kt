@@ -18,7 +18,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
  */
 
 
-class JwtRSA256(
+class JwtRS256(
     private val rsaKey: RSAKey
 ) {
     private val jwsAlgorithm: JWSAlgorithm = JWSAlgorithm.RS256
@@ -57,10 +57,10 @@ class JwtRSA256(
     fun toRSAKeyB64String(): String = rsaKey.toRSAKeyB64String()
 
     companion object {
-        fun of(rsaKey: RSAKey): JwtRSA256 = JwtRSA256(rsaKey)
-        fun ofRSAKeyB64String(rsaKeyB64: String): JwtRSA256 {
+        fun of(rsaKey: RSAKey): JwtRS256 = JwtRS256(rsaKey)
+        fun ofRSAKeyB64String(rsaKeyB64: String): JwtRS256 {
             val rsaKey: RSAKey = RSAKeyFactory.rsaKeyOfB64String(rsaKeyB64)
-            return JwtRSA256(rsaKey)
+            return JwtRS256(rsaKey)
         }
     }
 }

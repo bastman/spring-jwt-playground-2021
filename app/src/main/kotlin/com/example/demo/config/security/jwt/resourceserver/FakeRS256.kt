@@ -1,6 +1,6 @@
 package com.example.demo.config.security.jwt.resourceserver
 
-import com.example.demo.util.jwt.JwtRSA256
+import com.example.demo.util.jwt.JwtRS256
 import com.nimbusds.jose.jwk.RSAKey
 import mu.KLogging
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 
-object JwtResourceServerFakeRSA256 : KLogging() {
+object JwtResourceServerFakeRS256 : KLogging() {
 
     fun configure(
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
@@ -30,7 +30,7 @@ object JwtResourceServerFakeRSA256 : KLogging() {
         logger.info { "=> accept issuer: $issuer audience: $audience" }
     }
 
-    private fun jwtDecoder(rsaKey: RSAKey): NimbusJwtDecoder = JwtRSA256
+    private fun jwtDecoder(rsaKey: RSAKey): NimbusJwtDecoder = JwtRS256
         .of(rsaKey)
         .jwtDecoder {}
 

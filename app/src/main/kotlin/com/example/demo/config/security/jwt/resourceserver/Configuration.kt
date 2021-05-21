@@ -37,8 +37,8 @@ sealed class MyAuthConfig(
         val hs256Secret: String,
     ) : MyAuthConfig()
 
-    @JsonTypeName("JwtFakeRSA256")
-    data class JwtFakeRSA256(
+    @JsonTypeName("JwtFakeRS256")
+    data class JwtFakeRS256(
         val issuer: String,
         val audience: String,
         val rsaKeyB64: String

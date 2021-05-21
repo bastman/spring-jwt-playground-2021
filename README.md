@@ -19,7 +19,7 @@ let's check how to bearer-auth in 2021 :)
 VM Options:
 
 -D.spring.profiles.active=auth-prod
--D.spring.profiles.active=auth-fakeRSA256
+-D.spring.profiles.active=auth-fakeRS256
 -D.spring.profiles.active=auth-fakeHS256
 ```
 
@@ -37,7 +37,7 @@ click "login"
 ### curl
 
 ```
-# requires profile: auth-fakeRSA256  (or auth-fakeHS256)
+# requires profile: auth-fakeRS256  (or auth-fakeHS256)
 
 $ curl -v -X POST "http://localhost:8080/token/example-token"
 --> returns a self-signed jwt
