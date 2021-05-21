@@ -35,9 +35,9 @@ class SecurityConfig(
         "/swagger-ui.html",
         "/webjars/**",
 
-        // custom
-        "/token/**",
-        "/.well-known/**"
+        // custom: fake-authorization-server
+        "/.well-known/**",
+        "/oauth/**",
     )
 
     @Bean

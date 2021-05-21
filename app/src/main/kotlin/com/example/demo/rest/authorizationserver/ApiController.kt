@@ -35,7 +35,7 @@ class FakeAuthorizationServerApiController(
         }
     }
 
-    @PostMapping("/token/generate-rsa-keys")
+    @PostMapping("/oauth/generate-rsa-keys")
     fun generateRSAKeys(): Any? {
         val newRSAKey: RSAKey = RSAKeyFactory.generateRSAKey()
         return mapOf(
@@ -44,7 +44,7 @@ class FakeAuthorizationServerApiController(
         )
     }
 
-    @PostMapping("/token/example-token")
+    @PostMapping("/oauth/example-token")
     fun generateExampleToken(): Any? {
         val jwtIssuer: String = when (myAuthConfig) {
             is MyAuthConfig.JwtProd -> myAuthConfig.issuer
@@ -81,7 +81,7 @@ class FakeAuthorizationServerApiController(
         )
     }
 
-    @PostMapping("/token/sign-token")
+    @PostMapping("/oauth/sign-token")
     fun signToken(
         @RequestBody payload: Map<String, Any?>
     ): Any? {

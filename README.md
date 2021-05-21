@@ -3,8 +3,11 @@ let's check how to bearer-auth in 2021 :)
 
 ## scope
 - single-tenant resource-server
-- validate jwt claims: exp, iss, aud 
-- fake authorization server: show-case self-signed jwt - to simplify development
+    - validate jwt claims: exp, iss, aud 
+- simple fake authorization server:
+    - why? ... to simplify local development
+    - generate self-signed jwt
+    - sign any arbitrary jwt payload using (RS256, HS256)
 - spring boot (mvc)
 
 
@@ -34,16 +37,52 @@ enter "Bearer <your jwt>".
 click "login"
 ```
 
-### curl
+### use case: generate self-signed jwt
 
 ```
 # requires profile: auth-fakeRS256  (or auth-fakeHS256)
 
-$ curl -v -X POST "http://localhost:8080/token/example-token"
+$ curl -v -X POST "http://localhost:8080/oauth/example-token"
 --> returns a self-signed jwt
 
 $ curl -X GET "http://localhost:8080/api/me" -H "Authorization: Bearer <your token>"
 
+
+```
+
+### use case: sign any arbitrary jwt payload
+
+```
+# requires profile: auth-fakeRS256  (or auth-fakeHS256)
+
+# payload to sign ...
+
+{
+  "https://example.com/claims/userid": "my-issuer-1|my-user-id-1",
+  "https://app.example.com/roles": [
+    "my-role-1",
+    "my-role-2"
+  ],
+  "https://example.com/claims/given_name": "my-given-name",
+  "https://example.com/claims/family_name": "my-family-name",
+  "https://example.com/claims/email": "my.email@example.com",
+  "iss": "https://my-issuer-1.local",
+  "sub": "my-issuer-1|my-user-id-1",
+  "aud": [
+    "my-audience-1",
+    "my-audience-2"
+  ],
+  "iat": 1604327123,
+  "exp": 1604377523,
+  "scope": "openid profile email"
+}
+
+
+$ curl -v -X POST "http://localhost:8080/oauth/sign-token" -H "Content-Type: application/json" -d "{ \"https://example.com/claims/userid\": \"my-issuer-1|my-user-id-1\", \"https://app.example.com/roles\": [ \"my-role-1\", \"my-role-2\" ], \"https://example.com/claims/given_name\": \"my-given-name\", \"https://example.com/claims/family_name\": \"my-family-name\", \"https://example.com/claims/email\": \"my.email@example.com\", \"iss\": \"https://my-issuer-1.local\", \"sub\": \"my-issuer-1|my-user-id-1\", \"aud\": [ \"my-audience-1\", \"my-audience-2\" ], \"iat\": 1604327123, \"exp\": 1604377523, \"scope\": \"openid profile email\"}"
+
+--> returns a self-signed jwt
+
+$ curl -X GET "http://localhost:8080/api/me" -H "Authorization: Bearer <your token>"
 
 ```
 
