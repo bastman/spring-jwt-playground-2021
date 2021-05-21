@@ -52,3 +52,9 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+// https://spring.io/guides/topicals/spring-boot-docker/
+// https://docs.spring.io/spring-boot/docs/2.4.5/gradle-plugin/reference/htmlsingle/#build-image
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>("bootBuildImage") {
+    imageName = "docker.local/spring-jwt-playground-2021-app:snapshot"
+}

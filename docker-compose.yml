@@ -1,0 +1,13 @@
+version: '3'
+services:
+  spring-jwt-playground-2021-app:
+    image: docker.local/spring-jwt-playground-2021-app:snapshot
+    ports:
+      - "8080:8080"
+    environment:
+      - "SPRING_PROFILES_ACTIVE=auth-fakeRS256"
+    command: [
+        "java",
+        "org.springframework.boot.loader.JarLauncher",
+        "-Dspring.profiles.active=playground,auth0-dev,flyway-migrate"
+    ]

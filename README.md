@@ -86,6 +86,16 @@ $ curl -X GET "http://localhost:8080/api/me" -H "Authorization: Bearer <your tok
 
 ```
 
+## docker
+
+```
+# build image
+$ ./gradlew bootBuildImage
+
+# run 
+$ docker-compose up
+```
+
 ## see
 - https://itnext.io/secures-rest-apis-with-spring-security-5-and-auth0-41d579ca1e27
 - https://github.com/spring-projects/spring-security/blob/main/docs/manual/src/docs/asciidoc/_includes/servlet/oauth2/oauth2-resourceserver.adoc
