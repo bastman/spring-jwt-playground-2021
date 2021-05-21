@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain
  * see: https://github.com/hantsy/spring-security-auth0-sample/blob/master/api/src/main/java/com/example/demo/config/SecurityConfig.java
  */
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 class SecurityConfig(
     private val myAuthConfig: MyAuthConfig
 ) {

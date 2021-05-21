@@ -1,13 +1,15 @@
 package com.example.demo.rest
 
+import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.toAuthStrategyName
 import org.springframework.stereotype.Component
 
 @Component
 class ApiConfig(
-    // @Value(value = "\${app.envName}") val env: AppEnvName,
-    // @Value(value = "\${app.serviceName}") val service: String
+    private val myAuthConfig: MyAuthConfig
 ) {
     val title: String
-        //get() = "API $service ($env)"
-        get() = "Demo App - API"
+        get() = "Demo App - API (auth: ${myAuthConfig.toAuthStrategyName()})"
 }
+
+

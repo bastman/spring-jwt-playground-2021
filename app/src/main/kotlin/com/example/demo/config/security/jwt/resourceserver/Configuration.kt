@@ -51,7 +51,9 @@ sealed class MyAuthConfig(
 
 }
 
-@Configuration
+fun MyAuthConfig.toAuthStrategyName():String = "${this::class.simpleName}"
+
+@Configuration(proxyBeanMethods = false)
 class MyAuthConfiguration {
 
     @Bean
