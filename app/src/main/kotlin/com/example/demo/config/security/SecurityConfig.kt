@@ -5,11 +5,15 @@ import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerHS25
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerProd
 import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
 import mu.KLogging
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.crypto.password.NoOpPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 
 /**
@@ -43,7 +47,8 @@ class SecurityConfig(
     @Bean
     fun springWebFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
-            .httpBasic { it.disable() }
+            //.httpBasic { it.disable() }
+            .httpBasic { } // enable basic auth
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeRequests {
@@ -76,4 +81,43 @@ class SecurityConfig(
                 )
         }
 
+    @Autowired
+    fun configureBasicAuth(auth: AuthenticationManagerBuilder) {
+        var builder = auth
+            .inMemoryAuthentication()
+            .passwordEncoder(InsecurePlainTextBasicAuthPasswordDecoder())
+
+        val validUsers = listOf(
+            "foo-user" to "foo-password"
+        )
+        if (validUsers.isEmpty()) {
+            logger.warn { "AppAuth - No valid user defined" }
+        } else {
+            validUsers
+                .forEach {
+                    val username = it.first
+                    val password = it.second
+                    val roles: List<String> = listOf()
+                    logger.info { "AppAuth - add User: username=$username roles=$roles" }
+                    builder = builder
+                        .withUser(username)
+                        .password(password)
+                        .roles(*roles.toTypedArray())
+                        .and()
+                }
+        }
+
+
+    }
+
+}
+
+
+class InsecurePlainTextBasicAuthPasswordDecoder : PasswordEncoder {
+    // well we should use BCrypt or sth. instead
+    override fun encode(rawPassword: CharSequence?): String = NoOpPasswordEncoder
+        .getInstance().encode(rawPassword)
+
+    override fun matches(rawPassword: CharSequence?, encodedPassword: String?): Boolean = NoOpPasswordEncoder
+        .getInstance().matches(rawPassword, encodedPassword)
 }
