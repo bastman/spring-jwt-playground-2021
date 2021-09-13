@@ -1,5 +1,5 @@
-app.auth:
-  strategy: JwtProd
+app.auth.bearer:
+  strategy: JwtDefault
   # issuer: e.g.: https://<your_domain>.eu.auth0.com/
   issuer: ${APP_AUTH_ISSUER}
   # audience: e.g.: my-audience-1

@@ -1,7 +1,7 @@
 package com.example.demo.rest.authorizationserver
 
 
-import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.JwtAuthConfig
 import com.example.demo.util.jwt.*
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.jwk.RSAKey
@@ -19,7 +19,7 @@ import java.time.Instant
 
 @RestController
 class FakeAuthorizationServerApiController(
-    private val myAuthConfig: MyAuthConfig
+    private val myAuthConfig: JwtAuthConfig
 ) {
     companion object : KLogging()
 
@@ -30,7 +30,7 @@ class FakeAuthorizationServerApiController(
     @GetMapping("/.well-known/jwks.json")
     fun getJWKS(): Any? {
         return when (val it = myAuthConfig) {
-            is MyAuthConfig.JwtFakeRS256 -> it.rsaKey.toPublicJWKSetJSONString()
+            is JwtAuthConfig.JwtFakeRS256 -> it.rsaKey.toPublicJWKSetJSONString()
             else -> error("rsa authorization server - disabled")
         }
     }
@@ -47,14 +47,16 @@ class FakeAuthorizationServerApiController(
     @PostMapping("/oauth/example-token")
     fun generateExampleToken(): Any? {
         val jwtIssuer: String = when (myAuthConfig) {
-            is MyAuthConfig.JwtProd -> myAuthConfig.issuer
-            is MyAuthConfig.JwtFakeHS256 -> myAuthConfig.issuer
-            is MyAuthConfig.JwtFakeRS256 -> myAuthConfig.issuer
+            is JwtAuthConfig.JwtNone -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtDefault -> myAuthConfig.issuer
+            is JwtAuthConfig.JwtFakeHS256 -> myAuthConfig.issuer
+            is JwtAuthConfig.JwtFakeRS256 -> myAuthConfig.issuer
         }
         val jwtAudience: String = when (myAuthConfig) {
-            is MyAuthConfig.JwtProd -> myAuthConfig.audience
-            is MyAuthConfig.JwtFakeHS256 -> myAuthConfig.audience
-            is MyAuthConfig.JwtFakeRS256 -> myAuthConfig.audience
+            is JwtAuthConfig.JwtNone -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtDefault -> myAuthConfig.audience
+            is JwtAuthConfig.JwtFakeHS256 -> myAuthConfig.audience
+            is JwtAuthConfig.JwtFakeRS256 -> myAuthConfig.audience
         }
 
         val claimsSet: JWTClaimsSet = jwtClaimSet {
@@ -66,9 +68,10 @@ class FakeAuthorizationServerApiController(
         }
 
         val signedJwt: SignedJWT = when (myAuthConfig) {
-            is MyAuthConfig.JwtProd -> error("endpoint not enabled")
-            is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
+            is JwtAuthConfig.JwtNone -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtDefault -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
+            is JwtAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 
@@ -92,9 +95,10 @@ class FakeAuthorizationServerApiController(
         }
 
         val signedJwt: SignedJWT = when (myAuthConfig) {
-            is MyAuthConfig.JwtProd -> error("endpoint not enabled")
-            is MyAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
-            is MyAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
+            is JwtAuthConfig.JwtNone -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtDefault -> error("endpoint not enabled")
+            is JwtAuthConfig.JwtFakeHS256 -> signedJwtHS256(myAuthConfig.hs256Secret, claimsSet)
+            is JwtAuthConfig.JwtFakeRS256 -> signedJwtRS256(myAuthConfig.rsaKey, claimsSet)
         }
         val signedJwtSerialized: String = signedJwt.serialize()
 

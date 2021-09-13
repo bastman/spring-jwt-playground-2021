@@ -1,0 +1,7 @@
+app.auth.basicauth:
+  enabled: true
+  users:
+    foo:
+      password: bar
+    admin:
+      password: the-admin
