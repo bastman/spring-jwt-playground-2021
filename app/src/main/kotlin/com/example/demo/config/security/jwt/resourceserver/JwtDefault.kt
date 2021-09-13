@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtDecoders
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 
-object JwtResourceServerProd : KLogging() {
+object JwtResourceServerDefault : KLogging() {
 
     fun configure(
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,

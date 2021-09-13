@@ -1,9 +1,10 @@
 package com.example.demo.config.security
 
+import com.example.demo.config.security.basicauth.BasicAuthConfig
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerFakeRS256
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerHS256
-import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerProd
-import com.example.demo.config.security.jwt.resourceserver.MyAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerDefault
+import com.example.demo.config.security.jwt.resourceserver.JwtAuthConfig
 import mu.KLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -22,14 +23,19 @@ import org.springframework.security.web.SecurityFilterChain
 
 @Configuration(proxyBeanMethods = false)
 class SecurityConfig(
-    private val myAuthConfig: MyAuthConfig
+    private val jwtAuthConfig: JwtAuthConfig,
+    private val basicAuthConfig: BasicAuthConfig
 ) {
     companion object : KLogging()
 
     private val endpointsFullyAuthenticated: List<String> = listOf("/api/**")
     private val endpointsUnsecured: List<String> = listOf(
+        // index
         "/",
+        // actuator
+        "/health",
         "/info",
+        "/prometheus",
 
         // springfox-swagger2 (2.9.x)
         "/v2/api-docs",
@@ -38,6 +44,9 @@ class SecurityConfig(
         "/configuration/security",
         "/swagger-ui.html",
         "/webjars/**",
+
+        // basic-auth
+        "/csrf", // ???
 
         // custom: fake-authorization-server
         "/.well-known/**",
@@ -57,22 +66,38 @@ class SecurityConfig(
                     .antMatchers(*(endpointsFullyAuthenticated.toTypedArray())).fullyAuthenticated()
                     .anyRequest().authenticated()
             }
-            .oauth2ResourceServer { resourceServer(it, myAuthConfig) }
+            .let {
+                when(jwtAuthConfig) {
+                    is JwtAuthConfig.JwtNone-> it.oauth2ResourceServer { configurer->configurer.disable() }
+                    else->it.oauth2ResourceServer { configureJwtResourceServer(it, jwtAuthConfig) }
+                }
+            }
+            .let {
+                when(basicAuthConfig.enabled) {
+                    true-> it.httpBasic {  }
+                    else-> it.httpBasic { configurer-> configurer.disable() }
+                }
+            }
             .build()
     }
 
-    private fun resourceServer(rs: OAuth2ResourceServerConfigurer<HttpSecurity?>, authConfig: MyAuthConfig): Unit =
-        when (authConfig) {
-            is MyAuthConfig.JwtProd -> JwtResourceServerProd
+    private fun configureJwtResourceServer(
+        rs: OAuth2ResourceServerConfigurer<HttpSecurity?>, authConfig:JwtAuthConfig
+    ):Unit = when (authConfig) {
+            is JwtAuthConfig.JwtNone -> {
+                rs.disable()
+                Unit
+            }
+            is JwtAuthConfig.JwtDefault -> JwtResourceServerDefault
                 .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
-            is MyAuthConfig.JwtFakeRS256 -> JwtResourceServerFakeRS256
+            is JwtAuthConfig.JwtFakeRS256 -> JwtResourceServerFakeRS256
                 .configure(
                     rs = rs,
                     issuer = authConfig.issuer,
                     audience = authConfig.audience,
                     rsaKey = authConfig.rsaKey
                 )
-            is MyAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
+            is JwtAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
                 .configure(
                     rs = rs,
                     issuer = authConfig.issuer,
@@ -81,22 +106,26 @@ class SecurityConfig(
                 )
         }
 
+
     @Autowired
     fun configureBasicAuth(auth: AuthenticationManagerBuilder) {
+        val authConfig:BasicAuthConfig = basicAuthConfig
+        val users = when(authConfig.enabled) {
+            false-> null
+            true-> authConfig.users
+        }?: return
+
         var builder = auth
             .inMemoryAuthentication()
             .passwordEncoder(InsecurePlainTextBasicAuthPasswordDecoder())
 
-        val validUsers = listOf(
-            "foo-user" to "foo-password"
-        )
-        if (validUsers.isEmpty()) {
+        if (users.isEmpty()) {
             logger.warn { "AppAuth - No valid user defined" }
         } else {
-            validUsers
+            users
                 .forEach {
-                    val username = it.first
-                    val password = it.second
+                    val username = it.key
+                    val password = it.value.password
                     val roles: List<String> = listOf()
                     logger.info { "AppAuth - add User: username=$username roles=$roles" }
                     builder = builder

@@ -20,29 +20,32 @@ import org.springframework.core.env.Environment
     property = "strategy",
     visible = true
 )
-sealed class MyAuthConfig(
+sealed class JwtAuthConfig(
 
 ) {
 
-    @JsonTypeName("JwtProd")
-    data class JwtProd(
+    @JsonTypeName("JwtNone")
+    object JwtNone : JwtAuthConfig()
+
+    @JsonTypeName("JwtDefault")
+    data class JwtDefault(
         val issuer: String,
         val audience: String
-    ) : MyAuthConfig()
+    ) : JwtAuthConfig()
 
     @JsonTypeName("JwtFakeHS256")
     data class JwtFakeHS256(
         val issuer: String,
         val audience: String,
         val hs256Secret: String,
-    ) : MyAuthConfig()
+    ) : JwtAuthConfig()
 
     @JsonTypeName("JwtFakeRS256")
     data class JwtFakeRS256(
         val issuer: String,
         val audience: String,
         val rsaKeyB64: String
-    ) : MyAuthConfig() {
+    ) : JwtAuthConfig() {
 
         val rsaKey: RSAKey by lazy {
             RSAKeyFactory.rsaKeyOfB64String(rsaKeyB64 = rsaKeyB64)
@@ -51,19 +54,19 @@ sealed class MyAuthConfig(
 
 }
 
-fun MyAuthConfig.toAuthStrategyName():String = "${this::class.simpleName}"
+fun JwtAuthConfig.toAuthStrategyName():String = "${this::class.simpleName}"
 
 @Configuration(proxyBeanMethods = false)
-class MyAuthConfiguration {
+class JwtAuthConfiguration {
 
     @Bean
-    fun myAuthConfig(env: Environment): MyAuthConfig {
-        val q = "app.auth"
+    fun jwtAuthConfig(env: Environment): JwtAuthConfig {
+        val q = "app.auth.bearer"
         val asMap: Map<String, Any?> = Binder
             .get(env)
             .bind(q, Bindable.mapOf(String::class.java, Any::class.java))
             .get()
-        val converted: MyAuthConfig = JSON.convertValue(asMap)
+        val converted: JwtAuthConfig = JSON.convertValue(asMap)
         return converted
     }
 
