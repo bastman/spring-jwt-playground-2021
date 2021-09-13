@@ -19,7 +19,7 @@ import java.time.Instant
 
 @RestController
 class FakeAuthorizationServerApiController(
-    private val myAuthConfig: JwtAuthConfig
+    private val myAuthConfig: JwtAuthConfig,
 ) {
     companion object : KLogging()
 
@@ -86,7 +86,7 @@ class FakeAuthorizationServerApiController(
 
     @PostMapping("/oauth/sign-token")
     fun signToken(
-        @RequestBody payload: Map<String, Any?>
+        @RequestBody payload: Map<String, Any?>,
     ): Any? {
 
         val claimsSet: JWTClaimsSet = jwtClaimSet {

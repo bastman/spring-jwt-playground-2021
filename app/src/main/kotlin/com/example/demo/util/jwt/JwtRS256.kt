@@ -19,7 +19,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 
 
 class JwtRS256(
-    private val rsaKey: RSAKey
+    private val rsaKey: RSAKey,
 ) {
     private val jwsAlgorithm: JWSAlgorithm = JWSAlgorithm.RS256
     private val jwsSigner: RSASSASigner = RSASSASigner(rsaKey)

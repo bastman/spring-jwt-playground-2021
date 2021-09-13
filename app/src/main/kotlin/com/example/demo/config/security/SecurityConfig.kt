@@ -1,10 +1,10 @@
 package com.example.demo.config.security
 
 import com.example.demo.config.security.basicauth.BasicAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.JwtAuthConfig
+import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerDefault
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerFakeRS256
 import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerHS256
-import com.example.demo.config.security.jwt.resourceserver.JwtResourceServerDefault
-import com.example.demo.config.security.jwt.resourceserver.JwtAuthConfig
 import mu.KLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -24,7 +24,7 @@ import org.springframework.security.web.SecurityFilterChain
 @Configuration(proxyBeanMethods = false)
 class SecurityConfig(
     private val jwtAuthConfig: JwtAuthConfig,
-    private val basicAuthConfig: BasicAuthConfig
+    private val basicAuthConfig: BasicAuthConfig,
 ) {
     companion object : KLogging()
 
@@ -67,53 +67,53 @@ class SecurityConfig(
                     .anyRequest().authenticated()
             }
             .let {
-                when(jwtAuthConfig) {
-                    is JwtAuthConfig.JwtNone-> it.oauth2ResourceServer { configurer->configurer.disable() }
-                    else->it.oauth2ResourceServer { configureJwtResourceServer(it, jwtAuthConfig) }
+                when (jwtAuthConfig) {
+                    is JwtAuthConfig.JwtNone -> it.oauth2ResourceServer { configurer -> configurer.disable() }
+                    else -> it.oauth2ResourceServer { configureJwtResourceServer(it, jwtAuthConfig) }
                 }
             }
             .let {
-                when(basicAuthConfig.enabled) {
-                    true-> it.httpBasic {  }
-                    else-> it.httpBasic { configurer-> configurer.disable() }
+                when (basicAuthConfig.enabled) {
+                    true -> it.httpBasic { }
+                    else -> it.httpBasic { configurer -> configurer.disable() }
                 }
             }
             .build()
     }
 
     private fun configureJwtResourceServer(
-        rs: OAuth2ResourceServerConfigurer<HttpSecurity?>, authConfig:JwtAuthConfig
-    ):Unit = when (authConfig) {
-            is JwtAuthConfig.JwtNone -> {
-                rs.disable()
-                Unit
-            }
-            is JwtAuthConfig.JwtDefault -> JwtResourceServerDefault
-                .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
-            is JwtAuthConfig.JwtFakeRS256 -> JwtResourceServerFakeRS256
-                .configure(
-                    rs = rs,
-                    issuer = authConfig.issuer,
-                    audience = authConfig.audience,
-                    rsaKey = authConfig.rsaKey
-                )
-            is JwtAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
-                .configure(
-                    rs = rs,
-                    issuer = authConfig.issuer,
-                    audience = authConfig.audience,
-                    hs256Secret = authConfig.hs256Secret
-                )
+        rs: OAuth2ResourceServerConfigurer<HttpSecurity?>, authConfig: JwtAuthConfig,
+    ): Unit = when (authConfig) {
+        is JwtAuthConfig.JwtNone -> {
+            rs.disable()
+            Unit
         }
+        is JwtAuthConfig.JwtDefault -> JwtResourceServerDefault
+            .configure(rs = rs, issuer = authConfig.issuer, audience = authConfig.audience)
+        is JwtAuthConfig.JwtFakeRS256 -> JwtResourceServerFakeRS256
+            .configure(
+                rs = rs,
+                issuer = authConfig.issuer,
+                audience = authConfig.audience,
+                rsaKey = authConfig.rsaKey
+            )
+        is JwtAuthConfig.JwtFakeHS256 -> JwtResourceServerHS256
+            .configure(
+                rs = rs,
+                issuer = authConfig.issuer,
+                audience = authConfig.audience,
+                hs256Secret = authConfig.hs256Secret
+            )
+    }
 
 
     @Autowired
     fun configureBasicAuth(auth: AuthenticationManagerBuilder) {
-        val authConfig:BasicAuthConfig = basicAuthConfig
-        val users = when(authConfig.enabled) {
-            false-> null
-            true-> authConfig.users
-        }?: return
+        val authConfig: BasicAuthConfig = basicAuthConfig
+        val users = when (authConfig.enabled) {
+            false -> null
+            true -> authConfig.users
+        } ?: return
 
         var builder = auth
             .inMemoryAuthentication()

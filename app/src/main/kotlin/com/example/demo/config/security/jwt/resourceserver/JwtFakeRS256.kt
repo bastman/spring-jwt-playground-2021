@@ -15,7 +15,7 @@ object JwtResourceServerFakeRS256 : KLogging() {
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
         issuer: String,
         audience: String,
-        rsaKey: RSAKey
+        rsaKey: RSAKey,
     ) {
         rs.jwt {
             val validator: DelegatingOAuth2TokenValidator<Jwt> = JwtResourceServerCommon.jwtValidator(

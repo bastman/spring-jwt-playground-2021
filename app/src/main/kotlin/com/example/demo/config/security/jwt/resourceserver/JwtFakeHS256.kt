@@ -14,7 +14,7 @@ object JwtResourceServerHS256 : KLogging() {
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
         issuer: String,
         audience: String,
-        hs256Secret: String
+        hs256Secret: String,
     ) {
         rs.jwt {
             val validator: DelegatingOAuth2TokenValidator<Jwt> = JwtResourceServerCommon.jwtValidator(

@@ -13,7 +13,7 @@ object JwtResourceServerDefault : KLogging() {
     fun configure(
         rs: OAuth2ResourceServerConfigurer<HttpSecurity?>,
         issuer: String,
-        audience: String
+        audience: String,
     ) {
         rs.jwt {
             val validator: DelegatingOAuth2TokenValidator<Jwt> = JwtResourceServerCommon.jwtValidator(

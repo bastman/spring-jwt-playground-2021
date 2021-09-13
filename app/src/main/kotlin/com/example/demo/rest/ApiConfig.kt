@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class ApiConfig(
     private val jwtAuthConfig: JwtAuthConfig,
-    private val basicAuthConfig: BasicAuthConfig
+    private val basicAuthConfig: BasicAuthConfig,
 ) {
     val title: String
         get() = "Demo App - API (jwt-auth: ${jwtAuthConfig.toAuthStrategyName()} basic-auth.enabled: ${basicAuthConfig.enabled})"

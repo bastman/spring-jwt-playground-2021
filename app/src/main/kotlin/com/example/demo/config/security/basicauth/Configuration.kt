@@ -1,6 +1,5 @@
 package com.example.demo.config.security.basicauth
 
-import com.example.demo.config.security.jwt.resourceserver.JwtAuthConfig
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -11,10 +10,10 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
 
 data class BasicAuthConfig(
-    val enabled:Boolean,
-    val users:Map<String, User>?
+    val enabled: Boolean,
+    val users: Map<String, User>?,
 ) {
-    data class User(val password:String)
+    data class User(val password: String)
 }
 
 @Configuration(proxyBeanMethods = false)

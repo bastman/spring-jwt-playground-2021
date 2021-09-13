@@ -30,7 +30,7 @@ sealed class JwtAuthConfig(
     @JsonTypeName("JwtDefault")
     data class JwtDefault(
         val issuer: String,
-        val audience: String
+        val audience: String,
     ) : JwtAuthConfig()
 
     @JsonTypeName("JwtFakeHS256")
@@ -44,7 +44,7 @@ sealed class JwtAuthConfig(
     data class JwtFakeRS256(
         val issuer: String,
         val audience: String,
-        val rsaKeyB64: String
+        val rsaKeyB64: String,
     ) : JwtAuthConfig() {
 
         val rsaKey: RSAKey by lazy {
@@ -54,7 +54,7 @@ sealed class JwtAuthConfig(
 
 }
 
-fun JwtAuthConfig.toAuthStrategyName():String = "${this::class.simpleName}"
+fun JwtAuthConfig.toAuthStrategyName(): String = "${this::class.simpleName}"
 
 @Configuration(proxyBeanMethods = false)
 class JwtAuthConfiguration {

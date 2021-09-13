@@ -12,24 +12,24 @@ fun <T> JwtClaimValidator<T>.toOAuth2TokenValidator(): OAuth2TokenValidator<Jwt>
     }
 
 fun jwtCompoundOAuth2TokenValidator(
-    vararg tokenValidators: OAuth2TokenValidator<Jwt>
+    vararg tokenValidators: OAuth2TokenValidator<Jwt>,
 ): DelegatingOAuth2TokenValidator<Jwt> = DelegatingOAuth2TokenValidator(*tokenValidators)
 
 fun jwtIssuerClaimValidator(
-    claimName: String = JwtClaimNames.ISS, block: (issuer: String?) -> Boolean
+    claimName: String = JwtClaimNames.ISS, block: (issuer: String?) -> Boolean,
 ): JwtClaimValidator<String?> = JwtClaimValidator(claimName) { issuer: String? -> block(issuer) }
 
 fun jwtIssuerClaimValidator(
-    claimName: String = JwtClaimNames.ISS, acceptIssuers: List<String>
+    claimName: String = JwtClaimNames.ISS, acceptIssuers: List<String>,
 ): JwtClaimValidator<String?> =
     jwtIssuerClaimValidator(claimName = claimName) { issuer: String? -> issuer in acceptIssuers }
 
 fun jwtAudienceClaimValidator(
-    claimName: String = JwtClaimNames.AUD, block: (audience: List<String?>?) -> Boolean
+    claimName: String = JwtClaimNames.AUD, block: (audience: List<String?>?) -> Boolean,
 ): JwtClaimValidator<List<String?>?> = JwtClaimValidator(claimName) { audience: List<String?>? -> block(audience) }
 
 fun jwtAudienceClaimValidator(
-    claimName: String = JwtClaimNames.AUD, acceptAudiences: List<String>
+    claimName: String = JwtClaimNames.AUD, acceptAudiences: List<String>,
 ): JwtClaimValidator<List<String?>?> = jwtAudienceClaimValidator(claimName = claimName) { audience: List<String?>? ->
     when {
         audience == null -> false

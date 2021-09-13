@@ -12,7 +12,7 @@ import org.springframework.security.oauth2.jwt.JwtValidators
 object JwtResourceServerCommon {
 
     fun jwtValidator(
-        acceptIssuers: List<String>, acceptAudiences: List<String>
+        acceptIssuers: List<String>, acceptAudiences: List<String>,
     ): DelegatingOAuth2TokenValidator<Jwt> {
         val defaultValidator: OAuth2TokenValidator<Jwt> = JwtValidators.createDefault()
         val issuerValidator: OAuth2TokenValidator<Jwt> = jwtIssuerClaimValidator(acceptIssuers = acceptIssuers)
