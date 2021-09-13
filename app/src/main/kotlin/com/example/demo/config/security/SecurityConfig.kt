@@ -56,8 +56,6 @@ class SecurityConfig(
     @Bean
     fun springWebFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http
-            //.httpBasic { it.disable() }
-            .httpBasic { } // enable basic auth
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeRequests {
