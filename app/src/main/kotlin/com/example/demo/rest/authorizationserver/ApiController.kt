@@ -20,12 +20,27 @@ import java.time.Duration
 import java.time.Instant
 
 @RestController
+//@ConditionalOnExpression("\${app.auth.bearer.jwtFakeAuthorizationServer.enabled:true}")
+//@ConditionalOnExpression('${logging.level}'.equals('DEBUG'))
+/*
+@ConditionalOnProperty(
+    value=["xlogging.enabled"],
+    havingValue = "true",
+    matchIfMissing = false
+)
+
+ */
+
+/*
 @ConditionalOnExpression(
-    value = """
-        '\${'$'}{app.auth.bearer?.strategy?:}'.equals('JwtFakeHS256') 
-        or 
-        '\${'$'}{app.auth.bearer?.strategy?:}'.equals('JwtFakeRS256')
-    """
+    "\${logging.enabled:true} and '\${logging.level}'.equals('xDEBUG')"
+)
+
+
+ */
+
+@ConditionalOnExpression(
+    value = "'\${app.auth.bearer.strategy:}'.equals('JwtFakeHS256') or '\${app.auth.bearer.strategy:}'.equals('JwtFakeRS256')"
 )
 class FakeAuthorizationServerApiController(
     private val myAuthConfig: JwtAuthConfig,
