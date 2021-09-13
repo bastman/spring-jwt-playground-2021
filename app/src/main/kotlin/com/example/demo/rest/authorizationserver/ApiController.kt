@@ -8,6 +8,8 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import mu.KLogging
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,6 +20,13 @@ import java.time.Duration
 import java.time.Instant
 
 @RestController
+@ConditionalOnExpression(
+    value = """
+        '\${'$'}{app.auth.bearer?.strategy?:}'.equals('JwtFakeHS256') 
+        or 
+        '\${'$'}{app.auth.bearer?.strategy?:}'.equals('JwtFakeRS256')
+    """
+)
 class FakeAuthorizationServerApiController(
     private val myAuthConfig: JwtAuthConfig,
 ) {
