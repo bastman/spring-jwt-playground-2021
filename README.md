@@ -3,7 +3,8 @@ let's check how to bearer-auth in 2021 :)
 
 ## scope
 - single-tenant resource-server
-    - validate jwt claims: exp, iss, aud 
+    - bearer auth: validate jwt claims: exp, iss, aud 
+    - basic auth
 - simple fake authorization server:
     - why? ... to simplify local development
     - generate self-signed jwt
@@ -15,15 +16,23 @@ let's check how to bearer-auth in 2021 :)
 
 ### profiles
 
-- auth-prod: requires issuer-uri + audience as env variables
-- auth-fake: accepts/generates self-signed jwt (HS256, RS256). Do not use in production!
+- auth-basicauth: enable basic auth. [see: app/src/main/resources/application-auth-basicauth.yml](app/src/main/resources/application-auth-basicauth.yml)
+- auth-jwt-default: enable bearer auth. requires issuer-uri + audience as env variables [see: app/src/main/resources/application-auth-jwt-default.yml](app/src/main/resources/application-auth-jwt-default.yml)
+- auth-jwt-fakeHS256: enable bearer auth. accepts/generates self-signed jwt (HS256). Do not use in production! [see: app/src/main/resources/application-auth-jwt-fakeHS256.yml](app/src/main/resources/application-auth-jwt-fakeHS256.yml)
+- auth-jwt-fakeRS256: enable bearer auth. accepts/generates self-signed jwt (RS256). Do not use in production! [see: app/src/main/resources/application-auth-jwt-fakeRS256.yml](app/src/main/resources/application-auth-jwt-fakeRS256.yml)
 
 ```
-VM Options:
+VM Options, e.g.:
 
--D.spring.profiles.active=auth-prod
--D.spring.profiles.active=auth-fakeRS256
--D.spring.profiles.active=auth-fakeHS256
+-D.spring.profiles.active=auth-basicauth
+-D.spring.profiles.active=auth-jwt-default
+-D.spring.profiles.active=auth-jwt-fakeHS256
+-D.spring.profiles.active=auth-jwt-fakeRS256
+
+Note: you can combine jwt auth and basic auth to support graceful migration from basic auth to bearer auth e.g.:
+
+-D.spring.profiles.active=auth-basicauth,auth-jwt-fakeHS256
+
 ```
 
 ### swagger:
